@@ -17,7 +17,21 @@ on the local network.
 
 ## How to use
 
-### Install
+### Install (Docker)
+
+Pull the image from Docker:
+
+```bash
+docker pull fiews/cl-eth-failover
+```
+
+Start the container: (Read more in Usage to learn how to set multiple endpoints)
+
+```bash
+docker run fiews/cl-eth-failover wss://cl-ropsten.fiews.io/v1/yourApiKey
+```
+
+### Install (manually)
 
 To start off, you need Yarn/Node.js installed (and git, for cloning the repo).
 
@@ -39,18 +53,20 @@ Make sure we set the correct permissions:
 chmod +x ./index.js
 ```
 
-### Start
+### Usage
 
 This proxy will add any arguments to the script as ETH node endpoints.
 
 ```
-node ./index.js [node-1] [node-2] [...] [node-n]
+docker run fiews/cl-eth-failover [node-1] [node-2] [...] [node-n]
 ```
+
+*If not using Docker, replace `docker run fiews/cl-eth-failover` with `node ./index.js`*
 
 Example start command:
 
 ```bash
-node ./index.js wss://cl-ropsten.fiews.io/v1/myApiKey ws://localhost:8546/
+docker run fiews/cl-eth-failover wss://cl-ropsten.fiews.io/v1/myApiKey ws://localhost:8546/
 ```
 
 This will output the following:
