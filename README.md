@@ -19,7 +19,7 @@ on the local network.
 
 ### Install
 
-To start off, you need NPM/Node.js installed (and git, for cloning the repo).
+To start off, you need Yarn/Node.js installed (and git, for cloning the repo).
 
 Clone repository and enter directory:
 
@@ -30,7 +30,7 @@ git clone https://github.com/OracleFinder/ChainlinkEthFailover.git && cd Chainli
 Install dependencies:
 
 ```bash
-npm install
+yarn install
 ```
 
 Make sure we set the correct permissions:
