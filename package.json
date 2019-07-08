@@ -4,6 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "ganache-cli": "^6.4.4",
+    "mocha": "^6.1.4",
+    "socket.io": "^2.2.0",
+    "web3": "^1.0.0-beta.55",
     "websocket": "^1.0.28"
+  },
+  "scripts": {
+    "test": "mocha"
   }
 }
