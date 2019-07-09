@@ -19,9 +19,9 @@ before(async function () {
 })
 
 beforeEach(async function () {
-    //this.timeout(0);
     //Setup the failover server to be used for all tests, passing in a local instance of a blockchain client
-    server.start(["ws://localhost:8545/", "ws://localhost:7545/"])
+    //Change second argument to true to log from the server during tests
+    server.start(["ws://localhost:8545/", "ws://localhost:7545/"], false)
 
     //Setup a websocket to the server
     socket = new WebSocketClient()
@@ -36,7 +36,7 @@ afterEach(function (done) {
     done()
 })
 
-after(function(done) {
+after(function (done) {
     ganache_server1.close()
     ganache_server2.close()
     done()
@@ -56,7 +56,6 @@ it("can connect to the failover server", function (done) {
 });
 
 it("can connect to the ETH client", function (done) {
-    //this.timeout(0)
 
     socket.on('connectFailed', function (error) {
         assert.fail("Could not connect to server")
@@ -82,14 +81,8 @@ it("can connect to the ETH client", function (done) {
 });
 
 it("can failover to a second ETH client", function (done) {
-    //this.timeout(0)
-
-    socket.on('connect', function (connection) {
-
-        //Close server 1 and then send a message
-        ganache_server1.close(function () {
-            console.log("Closed server 1")
-
+    ganache_server1.close(function () {
+        socket.on('connect', function (connection) {
             connection.on("close", function () {
                 //Reconnect and now use backup ganache server
                 socket.connect("ws://localhost:4000/")
@@ -101,11 +94,27 @@ it("can failover to a second ETH client", function (done) {
                         //Response from ETH Client recieved
                         done()
                         _connection.close()
-                        //Restart ganache server 1
-                        //ganache_server1.listen("8545", "localhost")
                     })
                 });
             })
-        });
+        })
+    })
+});
+
+it("connection is closed when no clients are available", function (done) {
+    ganache_server2.close(function () {
+        socket.on("connect", function(connection) {
+            connection.send('{"jsonrpc":"2.0","method":"eth_accounts","params":[],"id":1}')
+
+            connection.on("message", function(msg) {
+                //Should not recieve a message from the ETH client
+                assert.fail()
+            })
+
+            connection.on("close", function(reasonCode, description) {
+                //Connection closed due to no ETH clients being available
+                done()
+            })
+        })
     })
 });

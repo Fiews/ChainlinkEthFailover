@@ -4,17 +4,32 @@ let http = require('http');
 
 var server;
 
-exports.start = function (passed_endpoints) {
+var log = function(msg, type, logging) {
+    //Only log if logging is true
+    if (logging != true) {
+        return;
+    }
+
+    if (type === "log") {
+        console.log(msg)
+    } else if (type === "error") {
+        console.error(msg)
+    }
+}
+exports.start = function (passed_endpoints, logging) {
     let endpoints = [];
-    //If being stared from the commandline, use argv inputs
+    //If being stared from the commandline, use argv inputs and set logging to true
     if (passed_endpoints === undefined) {
+        logging = true
         if (process.argv.length <= 2) {
-            console.error('No endpoints provided');
+            //console.error('No endpoints provided');
+            log('No endpoints provided', 'error', logging)
             process.exit();
         }
     
         for (let i = 2; i < process.argv.length; i++) {
-            console.log('Adding endpoint ' + process.argv[i] + ' to list');
+            //console.log('Adding endpoint ' + process.argv[i] + ' to list');
+            log('Adding endpoint ' + process.argv[i] + ' to list', 'log', logging)
             endpoints.push({
                 url: process.argv[i],
                 offlineSince: null,
@@ -24,7 +39,8 @@ exports.start = function (passed_endpoints) {
         }
     } else {
         for (let i = 0; i < passed_endpoints.length; i++) {
-            console.log('Adding endpoint ' + passed_endpoints[i] + ' to list');
+            //console.log('Adding endpoint ' + passed_endpoints[i] + ' to list');
+            log('Adding endpoint ' + process.argv[i] + ' to list', 'log', logging)
             endpoints.push({
                 url: passed_endpoints[i],
                 offlineSince: null,
@@ -36,7 +52,8 @@ exports.start = function (passed_endpoints) {
 
     server = http.createServer(function () { });
     server.listen(4000, function () {
-        console.log('Server is listening on port :4000');
+        //console.log('Server is listening on port :4000');
+        log('Server is listening on port :4000', 'log', logging)
     });
 
     wsServer = new WebSocketServer({
@@ -62,7 +79,8 @@ exports.start = function (passed_endpoints) {
     };
 
     const incomingConnection = (connection) => {
-        console.log('Accepted incoming connection');
+        //console.log('Accepted incoming connection');
+        log('Accepted incoming connection', 'log', logging)
 
         let client = new WebSocketClient();
         let eth = null;
@@ -78,7 +96,8 @@ exports.start = function (passed_endpoints) {
 
         let endpointId = selectEndpoint();
         if (endpointId == null) {
-            console.log('No suitable endpoints available');
+            //console.log('No suitable endpoints available');
+            log('No suitable endpoints available', 'log', logging)
             close(connection)
         }
 
@@ -91,7 +110,8 @@ exports.start = function (passed_endpoints) {
         });
 
         client.on('connectFailed', () => {
-            console.log('Unable to connect to endpoint ' + endpoints[endpointId].url);
+            //console.log('Unable to connect to endpoint ' + endpoints[endpointId].url);
+            log('Unable to connect to endpoint ' + endpoints[endpointId].url, 'log', logging)
             endpoints[endpointId].offlineSince = new Date();
             close(connection)
         });
@@ -101,12 +121,14 @@ exports.start = function (passed_endpoints) {
         connection.on('close', () => {
             endpoints[endpointId].expectedClose = true;
             close(eth);
-            console.log('Disconnecting...')
+            //console.log('Disconnecting...')
+            log('Disconnecting...', 'log', logging)
         });
 
         setTimeout(() => {
             if (connected) return;
-            console.log('Timed out trying to connect to endpoint ' + endpoints[endpointId].url);
+            //console.log('Timed out trying to connect to endpoint ' + endpoints[endpointId].url);
+            log('Timed out trying to connect to endpoint ' + endpoints[endpointId].url, 'log', logging)
             endpoints[endpointId].offlineSince = new Date();
             close(connection);
             close(eth);
@@ -123,7 +145,8 @@ exports.start = function (passed_endpoints) {
     };
 
     const outgoingConnection = (connection, eth, endpointId, backlog) => {
-        console.log('Connected to endpoint ' + endpoints[endpointId].url);
+        //console.log('Connected to endpoint ' + endpoints[endpointId].url);
+        log('Connected to endpoint ' + endpoints[endpointId].url, 'log', logging)
 
         for (let i = 0; i < backlog.length; i++) {
             sendData(eth, backlog[i]);
@@ -133,7 +156,8 @@ exports.start = function (passed_endpoints) {
             if (new Date() - endpoints[endpointId].lastHeader > 180000) {
                 endpoints[endpointId].offlineSince = new Date();
                 endpoints[endpointId].expectedClose = true;
-                console.log('Its been too long since we received a block header');
+                //console.log('Its been too long since we received a block header');
+                log('Its been too long since we received a block header', 'log', logging)
                 close(connection);
                 close(eth);
             }
@@ -142,7 +166,8 @@ exports.start = function (passed_endpoints) {
         eth.on('close', () => {
             if (!endpoints[endpointId].expectedClose) {
                 endpoints[endpointId].offlineSince = new Date();
-                console.log('Lost connection to endpoint ' + endpoints[endpointId].url + '!');
+                //console.log('Lost connection to endpoint ' + endpoints[endpointId].url + '!');
+                log('Lost connection to endpoint ' + endpoints[endpointId].url + '!', 'log', logging)
             }
             clearInterval(intervalId);
             close(connection)
