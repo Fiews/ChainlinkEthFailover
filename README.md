@@ -1,8 +1,5 @@
 # Chainlink ETH failover proxy
 
-**NOTE:** This is currently a beta release, and should only be using on test networks. A stable release will be tagged
-once it goes through sufficient testing.
-
 ## What does it do?
 
 Instead of relying on a single connection between your Chainlink node and an ETH node (your own or EaaS), you can use
