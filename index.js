@@ -4,6 +4,9 @@ let http = require('http')
 
 let server
 
+const messageSizeLimit = 150 * 1024 * 1024
+const frameSizeLimit = 150 * 1024 * 1024
+
 const log = function (msg, type, logging) {
   // Only log if logging is true
   if (logging !== true) {
@@ -57,7 +60,9 @@ exports.start = function (passed_endpoints, logging) {
   let wsServer = new WebSocketServer({
     httpServer: server,
     autoAcceptConnections: true,
-    keepalive: false
+    keepalive: true,
+    maxReceivedFrameSize: frameSizeLimit,
+    maxReceivedMessageSize: messageSizeLimit,
   })
 
   const selectEndpoint = () => {
@@ -79,7 +84,10 @@ exports.start = function (passed_endpoints, logging) {
   const incomingConnection = (connection) => {
     log('Accepted incoming connection', 'log', logging)
 
-    let client = new WebSocketClient()
+    let client = new WebSocketClient({
+      maxReceivedFrameSize: frameSizeLimit,
+      maxReceivedMessageSize: messageSizeLimit,
+    })
     let eth = null
     let backlog = []
 
