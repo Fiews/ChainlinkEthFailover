@@ -60,7 +60,7 @@ exports.start = function (passed_endpoints, logging) {
   let wsServer = new WebSocketServer({
     httpServer: server,
     autoAcceptConnections: true,
-    keepalive: true,
+    keepalive: false, // Disable due to bug in CL node
     maxReceivedFrameSize: frameSizeLimit,
     maxReceivedMessageSize: messageSizeLimit,
   })
