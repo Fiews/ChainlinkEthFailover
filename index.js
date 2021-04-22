@@ -20,6 +20,17 @@ const log = function (msg, type, logging) {
   }
 }
 
+// Helper function to convert text or binary to a JSON string
+const getMessageData = (message) => {
+    switch (message.type) {
+        case "utf8":
+            return message.utf8Data
+        case "binary":
+            return message.binaryData.toString()
+    }
+    return "{}"
+}
+
 exports.start = function (passed_endpoints, logging) {
   let endpoints = []
   // If being stared from the commandline, use argv inputs and set logging to true
@@ -93,10 +104,10 @@ exports.start = function (passed_endpoints, logging) {
 
     connection.on('message', function (message) {
       if (eth == null) {
-        backlog.push(message.utf8Data)
+        backlog.push(message)
         return
       }
-      sendData(eth, message.utf8Data)
+      sendData(eth, message)
     })
 
     let endpointId = selectEndpoint()
@@ -138,7 +149,7 @@ exports.start = function (passed_endpoints, logging) {
   }
 
   const hasBlockHeaderNotification = (data) => {
-    let msg = JSON.parse(data)
+    let msg = JSON.parse(getMessageData(data))
     if (Array.isArray(msg)) {
       for (let i = 0; i < msg.length; i++) {
         if (isBhn(msg[i])) return true
@@ -182,8 +193,8 @@ exports.start = function (passed_endpoints, logging) {
     })
 
     eth.on('message', (message) => {
-      sendData(connection, message.utf8Data)
-      if (hasBlockHeaderNotification(message.utf8Data)) {
+      sendData(connection, message)
+      if (hasBlockHeaderNotification(message)) {
         endpoints[endpointId].lastHeader = new Date()
       }
     })
@@ -198,7 +209,7 @@ exports.start = function (passed_endpoints, logging) {
 
   const sendData = (connection, data) => {
     if (connection == null || !connection.connected) return
-    connection.send(data)
+    connection.send(getMessageData(data))
   }
 
 }
