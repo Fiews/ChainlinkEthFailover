@@ -6,7 +6,7 @@ let server
 
 const messageSizeLimit = 150 * 1024 * 1024
 const frameSizeLimit = 150 * 1024 * 1024
-const headersTimeout = process.env.HEADERS_TIMEOUT || 180000
+const headersTimeout = process.env.HEADERS_TIMEOUT*1000 || 180000
 
 const log = function (msg, type, logging) {
   // Only log if logging is true
