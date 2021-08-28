@@ -11,6 +11,7 @@ on the local network.
 * Automatic failover for any number of ETH nodes
 * Connection timeouts
 * Automatically checks if it's receiving block header notifications
+* Custom headers timeout through HEADERS_TIMEOUT environment variable (seconds)
 
 ## How to use
 
@@ -55,7 +56,7 @@ chmod +x ./index.js
 This proxy will add any arguments to the script as ETH node endpoints.
 
 ```
-docker run fiews/cl-eth-failover [node-1] [node-2] [...] [node-n]
+docker run [-e HEADERS_TIMEOUT={}] fiews/cl-eth-failover [node-1] [node-2] [...] [node-n]
 ```
 
 *If not using Docker, replace `docker run fiews/cl-eth-failover` with `node ./index.js`*

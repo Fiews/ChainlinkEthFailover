@@ -6,6 +6,7 @@ let server
 
 const messageSizeLimit = 150 * 1024 * 1024
 const frameSizeLimit = 150 * 1024 * 1024
+const headersTimeout = process.env.HEADERS_TIMEOUT*1000 || 180000
 
 const log = function (msg, type, logging) {
   // Only log if logging is true
@@ -174,7 +175,7 @@ exports.start = function (passed_endpoints, logging) {
     }
 
     let intervalId = setInterval(() => {
-      if (new Date() - endpoints[endpointId].lastHeader > 180000) {
+      if (new Date() - endpoints[endpointId].lastHeader > headersTimeout) {
         endpoints[endpointId].offlineSince = new Date()
         endpoints[endpointId].expectedClose = true
         log('Its been too long since we received a block header', 'log', logging)
