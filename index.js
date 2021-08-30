@@ -213,6 +213,12 @@ exports.start = function (passed_endpoints, logging) {
     connection.send(getMessageData(data))
   }
 
+  process.on('SIGTERM', () => {
+    log('Disconnecting...', 'log', logging)
+    wsServer.closeAllConnections()
+    process.exit()
+  });
+
 }
 
 exports.close = function () {
