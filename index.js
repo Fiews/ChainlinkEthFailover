@@ -214,7 +214,7 @@ exports.start = function (passed_endpoints, logging) {
   }
 
   process.on('SIGTERM', () => {
-    console.info('Disconnecting...');
+    log('Disconnecting...', 'log', logging)
     wsServer.closeAllConnections()
     process.exit()
   });
