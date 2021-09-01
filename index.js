@@ -113,7 +113,7 @@ exports.start = function (passed_endpoints, logging) {
 
     let endpointId = selectEndpoint()
     if (endpointId == null) {
-      log('No suitable endpoints available', 'log', logging)
+      log('RPC Error: No suitable endpoints available', 'log', logging)
       close(connection)
     }
 
@@ -126,7 +126,7 @@ exports.start = function (passed_endpoints, logging) {
     })
 
     client.on('connectFailed', () => {
-      log('Unable to connect to endpoint ' + endpoints[endpointId].url, 'log', logging)
+      log('RPC Error: Unable to connect to endpoint ' + endpoints[endpointId].url, 'log', logging)
       endpoints[endpointId].offlineSince = new Date()
       close(connection)
     })
@@ -141,7 +141,7 @@ exports.start = function (passed_endpoints, logging) {
 
     setTimeout(() => {
       if (connected) return
-      log('Timed out trying to connect to endpoint ' + endpoints[endpointId].url, 'log', logging)
+      log('RPC Error: Timed out trying to connect to endpoint ' + endpoints[endpointId].url, 'log', logging)
       endpoints[endpointId].offlineSince = new Date()
       close(connection)
       close(eth)
@@ -178,7 +178,7 @@ exports.start = function (passed_endpoints, logging) {
       if (new Date() - endpoints[endpointId].lastHeader > headersTimeout) {
         endpoints[endpointId].offlineSince = new Date()
         endpoints[endpointId].expectedClose = true
-        log('Its been too long since we received a block header', 'log', logging)
+        log('RPC Error: Its been too long since we received a block header from ' + endpoints[endpointId].url, 'log', logging)
         close(connection)
         close(eth)
       }
@@ -187,7 +187,7 @@ exports.start = function (passed_endpoints, logging) {
     eth.on('close', () => {
       if (!endpoints[endpointId].expectedClose) {
         endpoints[endpointId].offlineSince = new Date()
-        log('Lost connection to endpoint ' + endpoints[endpointId].url + '!', 'log', logging)
+        log('RPC Error: Lost connection to endpoint ' + endpoints[endpointId].url + '!', 'log', logging)
       }
       clearInterval(intervalId)
       close(connection)
@@ -214,7 +214,7 @@ exports.start = function (passed_endpoints, logging) {
   }
 
   process.on('SIGTERM', () => {
-    log('Disconnecting...', 'log', logging)
+    log('Received SIGTERM. Terminating...', 'log', logging)
     wsServer.closeAllConnections()
     process.exit()
   });
